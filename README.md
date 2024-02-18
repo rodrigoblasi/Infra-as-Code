@@ -1,1 +1,8 @@
-# Infra-as-Code
+## Objetivo:
+Este projeto tem como objetivo principal proporcionar uma oportunidade prática para o aprimoramento das habilidades em Infraestrutura como Código (IaC) utilizando Terraform e Ansible. Com foco no aprendizado pessoal, o projeto busca oferecer uma plataforma para explorar e entender os conceitos fundamentais de IaC, bem como a implementação prática desses conceitos na criação de ambientes de teste na nuvem.
+## Metodologia:
+A metodologia do projeto é baseada em experimentação e aprendizado hands-on. Serão realizadas iterações de implementação, testes e refinamento das configurações usando Terraform e Ansible. Cada etapa do projeto será cuidadosamente documentada em formato de anotações pessoais, registrando os desafios enfrentados, soluções encontradas e lições aprendidas ao longo do caminho.
+## Resultados Esperados:
+Espera-se que, ao final do projeto, o participante tenha adquirido uma compreensão sólida dos princípios de IaC e uma proficiência prática no uso de Terraform e Ansible para provisionar e configurar ambientes de teste na nuvem. As anotações produzidas durante o projeto servirão como um valioso recurso de referência pessoal, podendo ser compartilhadas no futuro com a comunidade, caso desejado.
+
+*Este projeto é uma jornada de autodescoberta e aprendizado contínuo, destinada a fortalecer as habilidades em infraestrutura moderna e preparar o participante para desafios futuros no campo da tecnologia da informação.*
