@@ -51,7 +51,10 @@ variable "compartment_id" {
 
 variable "shape" {
   type    = string
+  # "VM.Standard.A1.Flex, 1 ocpu+ 6gb ram" = aarm64 =  always free Tier
   default = "VM.Standard.A1.Flex"
+  #"VM.Standard.E2.1" = expensive as fuck
+  # default = "VM.Standard.E2.1"
 }
 
 variable "ocpus" {
@@ -61,13 +64,21 @@ variable "ocpus" {
 
 variable "memory_in_gbs" {
   type    = number
+  #Always Free Tier = MAX 24gb somado entre as instancias!
+  # 6gb ram x4 instancias OR 8gb x3 instancias
   default = 6
 }
 
 variable "image_id" {
   type    = string
-  # Rocky Linux 8.7 aarm
+  # Rocky Linux 8.7 x86_64
+  #default = "ocid1.image.oc1..aaaaaaaa6ccbrxnbumu3pgej4fkz4hocepobygopdkwfyp5jxeww7ykrf2aq"
+  # Rocky Linux 8.7 aarm = Free tier
   default = "ocid1.image.oc1..aaaaaaaa4bhzxdzvzl2ekifexq23ygl7bkw5v3lk7eamleusll25o7eyd52q"
+  #Ubuntu 22.04 Minimal aarch64 = Free Tier
+  #default = "ocid1.image.oc1.sa-saopaulo-1.aaaaaaaafyfvel5uwzbalj4uuzqqlv67npw65vvq63ce6qpg6nrkee4hseua"
+  #Ubuntu 22.04 aarch64 = free Tier
+  #default = "ocid1.image.oc1.sa-saopaulo-1.aaaaaaaaxl7vfxg4tcbk6wiceqcbzvhny4ztvtpsbspg6xbpdk2wjvwnaj3a"
 }
 
 variable "public_subnet_id" {
@@ -82,7 +93,7 @@ variable "private_subnet_id" {
 
 variable "num_infra_instances" {
   description = "Número de instâncias de infraestrutura a serem criadas"
-  default     = 1
+  default     = 0
 }
 
 variable "num_k8smaster_instances" {
@@ -92,5 +103,5 @@ variable "num_k8smaster_instances" {
 
 variable "num_k8sworker_instances" {
   description = "Número de instâncias de k8sworker a serem criadas"
-  default     = 1
+  default     = 3
 }

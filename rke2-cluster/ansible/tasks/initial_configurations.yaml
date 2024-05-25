@@ -1,0 +1,134 @@
+---
+- name: Initial Configuration
+  hosts: all
+  gather_facts: no
+  vars_files:
+    - ../vars/vars_sensitive.yaml
+  remote_user: "{{ rocky_linux_user }}"
+  become: yes  #sudo
+  tasks:
+    # SO UPDATES
+    - name: Update package cache and upgrade packages (yum)
+      yum:
+        name: '*'
+        state: latest
+        update_cache: yes
+
+    # TIMEZONE
+    - name: Check current timezone
+      shell: "timedatectl | grep 'Time zone' | awk '{print $3}'"
+      register: current_timezone
+      changed_when: false
+      ignore_errors: yes
+
+    - name: Set timezone to America/Sao_Paulo if not already set
+      timezone:
+        name: America/Sao_Paulo
+      when: current_timezone.stdout != "America/Sao_Paulo"
+
+
+    # SELINUX
+    - name: Check SELinux status
+      shell: getenforce
+      register: selinux_status
+      changed_when: false
+      failed_when: false
+
+    - name: Print SELinux status
+      debug:
+        msg: "SELinux is currently {{ selinux_status.stdout }}."
+
+    - name: Disable SELinux if it is enabled
+      lineinfile:
+        dest: /etc/selinux/config
+        regexp: '^SELINUX='
+        line: 'SELINUX=disabled'
+      when: selinux_status.stdout != "Disabled"
+
+    # SWAP
+    - name: Check if swap is enabled
+      shell: swapon --show
+      register: swap_status
+      changed_when: false
+      failed_when: false
+
+    - name: Print swap status
+      debug:
+        msg: "Swap is currently enabled."
+      when: swap_status.stdout_lines | length > 1
+
+    - name: Print swap status
+      debug:
+        msg: "Swap is currently disabled, nothing to do."
+      when: swap_status.stdout_lines | length == 0
+
+    - name: Disable swap
+      shell: swapoff -a
+      when: swap_status.stdout_lines | length > 1
+
+    - name: Remove swap entries from /etc/fstab
+      replace:
+        path: /etc/fstab
+        regexp: '^.*swap.*$'
+        replace: ''
+      when: swap_status.stdout_lines | length > 1
+
+    # FIREWALLD
+    - name: Check if firewalld service exists and is enabled
+      stat:
+        path: /usr/lib/systemd/system/firewalld.service
+      register: firewalld_service
+
+    - name: Stop and disable firewalld if it exists and is enabled
+      service:
+        name: firewalld
+        state: stopped
+        enabled: no
+      when: firewalld_service.stat.exists and firewalld_service.stat.mode == "0755"
+
+    # EXTRA PACKAGES INSTALL
+    - name: Install required packages
+      yum:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - yum-utils
+        - iscsi-initiator-utils
+
+    # DOCKER INSTALL
+    - name: Add official Docker repository
+      command: >
+        sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+    - name: Install Docker packages
+      dnf:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+
+    - name: Start Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add {{ rocky_linux_user }} to docker group
+      command: >
+        sudo usermod -aG docker {{ rocky_linux_user }}
+      changed_when: false
+
+    # HELM INSTALL V3.14 (check: https://github.com/helm/helm/releases for latest)
+    - name: Install helm if not exists
+      unarchive:
+        src: https://get.helm.sh/helm-v3.14.4-linux-arm64.tar.gz
+        dest: /usr/local/bin
+        extra_opts: "--strip-components=1"
+        owner: root
+        group: root
+        mode: 0755
+        remote_src: true
+      args:
+        creates: /usr/local/bin/helm

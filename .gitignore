@@ -35,3 +35,4 @@ terraform.rc
 
 # Added by me
 .terraform.lock.hcl
+quicknotes.md
